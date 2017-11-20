@@ -1,14 +1,21 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"os"
-	"strconv"
 	"time"
 )
 
+//var globalConns = make([]net.Conn)
+var globalConns []net.Conn
+
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	service := ":7777"
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", service)
 	checkError(err)
@@ -19,36 +26,66 @@ func main() {
 		if err != nil {
 			continue
 		}
-
+		log.Println(conn)
+		globalConns = append(globalConns, conn)
 		go handleClient(conn)
 	}
 }
 
 func handleClient(conn net.Conn) {
 	conn.SetReadDeadline(time.Now().Add(2 * time.Minute))
-	request := make([]byte, 128)
-	defer conn.Close()
+	req := make([]byte, 1024) // 1KB
+	defer func() {
+		var tgc []net.Conn
+		for _, gc := range globalConns {
+			if gc != conn {
+				tgc = append(tgc, gc)
+			}
+		}
+		globalConns = tgc
+		log.Println(len(globalConns))
+		conn.Close()
+	}()
 	for {
-		readLen, err := conn.Read(request)
+		readLen, err := conn.Read(req)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			break
 		}
 		if readLen == 0 {
 			break
 		} else {
-			msg := string(request[:readLen])
-			if msg == "timestamp\r\n" {
-				daytime := strconv.FormatInt(time.Now().Unix(), 10)
-				conn.Write([]byte(daytime))
+			var res bytes.Buffer
+			// End with '\r\n'
+			if req[readLen-2] == 13 && req[readLen-1] == 10 {
+				var dat map[string]string
+				if err := json.Unmarshal(req[:readLen-2], &dat); err != nil {
+					res.WriteString("Invalid instruction: ")
+					res.Write(req[:readLen-2])
+					res.WriteString("\n")
+				} else {
+					res.WriteString("Instruction: ")
+					res.Write(req[:readLen-2])
+					res.WriteString("\n")
+					if dat["a"] == "a" {
+						conn.Write(res.Bytes())
+						break
+					}
+				}
 			} else {
-				fmt.Println("2222", string(request))
-				daytime := time.Now().String()
-				conn.Write([]byte(daytime))
+				res.WriteString("Invalid instruction: ")
+				res.Write(req[:readLen])
+				res.WriteString("\n")
 			}
+
+			conn.Write(res.Bytes())
+			req = make([]byte, 1024)
 		}
-		request = make([]byte, 128)
 	}
+}
+
+func closeConn(conn net.Conn) {
+
 }
 
 func checkError(err error) {
