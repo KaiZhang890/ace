@@ -90,9 +90,7 @@ OuterLoop:
 		case 2:
 			if user.group != nil {
 				for _, u := range user.group {
-					if u.name != user.name {
-						u.conn.Write([]byte(user.name + " says: " + command + "\n"))
-					}
+					u.conn.Write([]byte(user.name + " says: " + command + "\n"))
 				}
 			} else if command == "2" {
 
@@ -131,6 +129,10 @@ func handleReady(c chan *user) {
 			readyUsers = readyUsers[3:]
 		}
 	}
+}
+
+func handleGroup(group []*user) {
+
 }
 
 func handleReadyCancel(c chan *user) {

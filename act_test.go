@@ -97,3 +97,30 @@ func Test_ParseJson(t *testing.T) {
 	str1 := strs[0].(string)
 	fmt.Println(str1)
 }
+
+func binarySearch(list []int, target int) int {
+	start := 0
+	end := len(list)
+	ret := -1
+
+	for start < end {
+		mid := int((end-start)/2) + start
+		fmt.Println(start, end, mid)
+		if list[mid] < target {
+			start = mid
+		} else if list[mid] > target {
+			end = mid
+		} else {
+			ret = mid + 1
+			break
+		}
+	}
+
+	return ret
+}
+
+func Test_BinarySearch(t *testing.T) {
+	list := []int{2, 7, 9, 12, 23, 44, 55, 99}
+	ret := binarySearch(list, 99)
+	fmt.Println(ret)
+}
