@@ -16,7 +16,8 @@ type Card struct {
 }
 
 func (c Card) String() string {
-	return fmt.Sprintf("%s(%s)", c.Type, c.Suit)
+	//return fmt.Sprintf("%s(%s)", c.Type, c.Suit)
+	return c.Type
 }
 
 func (c Card) desc() string {

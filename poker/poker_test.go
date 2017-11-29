@@ -3,218 +3,276 @@ package main
 import "testing"
 import "fmt"
 
+func Test_DeckPlay1(t *testing.T) {
+	d1 := Deck{card("3")}
+	d2 := Deck{card("2")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5")}
+	d2 = Deck{card("Ace"), card("Ace")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5"), card("5"), card("3")}
+	d2 = Deck{card("8"), card("8"), card("8"), card("3")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("6"), card("7"), card("8"), card("9")}
+	d2 = Deck{card("8"), card("9"), card("10"), card("Jack"), card("Queen")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5"), card("6"), card("6"), card("7"), card("7")}
+	d2 = Deck{card("Jack"), card("Jack"), card("Queen"), card("Queen"), card("King"), card("King")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5"), card("5"),
+		card("6"), card("6"), card("6"),
+		card("3"), card("3")}
+	d2 = Deck{card("7"), card("7"), card("7"),
+		card("8"), card("8"), card("8"),
+		card("4"), card("5")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5"), card("5"), card("5")}
+	d2 = Deck{card("2"), card("2"), card("2"), card("2")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5")}
+	d2 = Deck{card("3"), card("3"), card("3"), card("3")}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5"), card("5"), card("5")}
+	d2 = Deck{Card{"Black", "Joker"}, Card{"Colored", "Joker"}}
+	checkCanPlay(d1, d2)
+
+	d1 = Deck{card("5"), card("5"), card("5"),
+		card("6"), card("6"), card("6")}
+	d2 = Deck{Card{"Black", "Joker"}, Card{"Colored", "Joker"}}
+	checkCanPlay(d1, d2)
+}
+
+func checkCanPlay(d1 Deck, d2 Deck) {
+	if d2.canPlay(d1) {
+		fmt.Println(d2, "can beat", d1)
+	} else {
+		fmt.Println(d2, "can't beat", d1)
+	}
+}
+
 func Test_DeckType(t *testing.T) {
-	d := Deck{Card{"3", "Heart"}}
+	// 41
+	// 13, 17, 19
+	d := Deck{card("3")}
 	checkDeckType(&d)
 
-	d = Deck{Card{"Ace", "Heart"}, Card{"Ace", "Diamond"}}
+	d = Deck{card("3"), card("3")}
 	checkDeckType(&d)
 
-	d = Deck{Card{"Colored", "Joker"}, Card{"Black", "Joker"}}
+	d = Deck{Card{"Black", "Joker"}, Card{"Colored", "Joker"}}
 	checkDeckType(&d)
 
-	d = Deck{Card{"Queen", "Heart"}, Card{"Queen", "Diamond"}, Card{"Queen", "Spade"}}
+	d = Deck{card("3"), card("3"), card("3")}
 	checkDeckType(&d)
 
-	d = Deck{Card{"8", "Heart"}, Card{"8", "Diamond"}, Card{"8", "Spade"}, Card{"8", "Club"}}
+	d = Deck{card("3"), card("3"), card("3"), card("3")}
 	checkDeckType(&d)
 
-	d = Deck{Card{"10", "Heart"}, Card{"2", "Diamond"}, Card{"10", "Spade"}, Card{"10", "Club"}}
+	d = Deck{card("3"), card("3"), card("3"), card("4")}
 	checkDeckType(&d)
 
-	d = Deck{Card{"10", "Heart"}, Card{"10", "Diamond"}, Card{"King", "Spade"}, Card{"10", "Club"}, Card{"King", "Diamond"}}
+	d = Deck{card("3"), card("3"), card("3"), card("4"), card("4")}
 	checkDeckType(&d)
 
-	d = Deck{Card{"3", "Heart"}, Card{"4", "Heart"}, Card{"7", "Spade"}, Card{"6", "Club"}, Card{"5", "Spade"}}
+	d = Deck{card("3"), card("4"), card("5"), card("6"), card("7")}
 	checkDeckType(&d)
 
-	d = Deck{Card{"10", "Heart"}, Card{"10", "Diamond"}, Card{"10", "Spade"}, Card{"10", "Club"}, Card{"King", "Diamond"}}
+	d = Deck{card("3"), card("3"), card("3"), card("3"), card("4"), card("4")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("3"), card("3"), card("4"), card("4")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("5"), card("5"), card("4"), card("4")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"), card("5"), card("4")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("5"), card("6"), card("7"), card("8")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("5"), card("6"), card("7"), card("8"), card("9")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"), card("4"), card("4"), card("4"), card("4")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("5"), card("4"), card("4"), card("4"), card("5")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("4"), card("4"), card("5"), card("5"), card("6"), card("6")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("5"), card("4"), card("4"), card("4"), card("6")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("5"), card("6"), card("7"), card("8"), card("9"), card("10")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("5"), card("6"), card("7"), card("8"), card("9"), card("10"), card("Jack")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("4"), card("4"), card("4"), card("5"), card("5"), card("6"), card("6")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("4"), card("4"), card("5"), card("5"), card("6"), card("6"), card("7"), card("7")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("5"), card("6"), card("7"), card("8"), card("9"), card("10"), card("Jack"), card("Queen")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("5"), card("6"), card("7"), card("8"), card("9"), card("10"), card("Jack"), card("Queen"), card("King")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"), card("5")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("6"), card("6")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"),
+		card("4"), card("4"),
+		card("5"), card("5"),
+		card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"), card("4"),
+		card("5"), card("6"), card("7"), card("8")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"),
+		card("6"), card("7"), card("8")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("4"), card("5"),
+		card("6"), card("7"), card("8"),
+		card("9"), card("10"), card("Jack"),
+		card("Queen"), card("King"), card("Ace")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"),
+		card("4"), card("4"),
+		card("5"), card("5"),
+		card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8"),
+		card("9"), card("9")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"),
+		card("6"), card("6"), card("6"),
+		card("7"), card("7"), card("7")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"),
+		card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"), card("5"),
+		card("6"), card("6"), card("6"), card("6")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"),
+		card("4"), card("4"),
+		card("5"), card("5"),
+		card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8"),
+		card("9"), card("9"),
+		card("10"), card("10")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"),
+		card("6"), card("6"), card("6"),
+		card("7"), card("8"), card("9"), card("10")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"), card("5"),
+		card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"),
+		card("4"), card("4"),
+		card("5"), card("5"),
+		card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8"),
+		card("9"), card("9"),
+		card("10"), card("10"),
+		card("Jack"), card("Jack")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"), card("5"),
+		card("6"), card("7"),
+		card("8"), card("9"),
+		card("10"), card("Jack")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"), card("3"),
+		card("4"), card("4"), card("4"),
+		card("5"), card("5"), card("5"),
+		card("6"), card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8"),
+		card("9"), card("9"),
+		card("10"), card("10")}
+	checkDeckType(&d)
+
+	d = Deck{card("3"), card("3"),
+		card("4"), card("4"),
+		card("5"), card("5"),
+		card("6"), card("6"),
+		card("7"), card("7"),
+		card("8"), card("8"),
+		card("9"), card("9"),
+		card("10"), card("10"),
+		card("Jack"), card("Jack"),
+		card("Queen"), card("Queen")}
 	checkDeckType(&d)
 }
 
-func Test_DeckType2(t *testing.T) {
-	d := Deck{{"Ace", "Heart"}, {"9", "Heart"}, {"10", "Diamond"}, {"Jack", "Spade"}, {"Queen", "Club"}, {"King", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"7", "Heart"}, {"7", "Spade"}, {"9", "Diamond"}, {"9", "Spade"}, {"8", "Club"}, {"8", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"Ace", "Heart"}, {"Ace", "Spade"}, {"Ace", "Diamond"}, {"Ace", "Club"}, {"8", "Club"}, {"3", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"4", "Spade"}, {"4", "Diamond"}, {"3", "Club"}, {"4", "Club"}, {"3", "Diamond"}}
-	checkDeckType(&d)
-}
-
-func Test_DeckType3(t *testing.T) {
-	d := Deck{{"4", "Heart"}, {"5", "Heart"}, {"9", "Diamond"}, {"10", "Spade"}, {"6", "Club"}, {"7", "Diamond"}, {"8", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"3", "Diamond"}, {"3", "Club"},
-		{"4", "Heart"}, {"4", "Spade"}, {"4", "Diamond"}, {"4", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"4", "Heart"}, {"4", "Spade"}, {"5", "Diamond"}, {"5", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"9", "Heart"}, {"Jack", "Spade"}, {"6", "Diamond"}, {"8", "Club"},
-		{"7", "Heart"}, {"10", "Spade"}, {"4", "Diamond"}, {"5", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"3", "Heart"}, {"4", "Spade"}, {"Ace", "Diamond"}, {"6", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"3", "Heart"}, {"4", "Spade"}, {"7", "Diamond"}, {"7", "Club"}}
-	checkDeckType(&d)
-}
-
-func Test_DeckType4(t *testing.T) {
-	d := Deck{{"3", "Heart"}, {"4", "Spade"}, {"7", "Diamond"}, {"6", "Club"},
-		{"5", "Heart"}, {"8", "Spade"}, {"9", "Diamond"}, {"10", "Club"}, {"Jack", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"4", "Spade"}, {"7", "Diamond"}, {"6", "Club"}, {"5", "Heart"},
-		{"8", "Spade"}, {"9", "Diamond"}, {"10", "Club"}, {"Jack", "Club"}, {"Queen", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"4", "Spade"}, {"7", "Diamond"}, {"6", "Club"}, {"5", "Heart"},
-		{"8", "Spade"}, {"9", "Diamond"}, {"10", "Club"}, {"Jack", "Club"}, {"Queen", "Club"},
-		{"King", "Spade"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"4", "Spade"}, {"7", "Diamond"}, {"6", "Club"}, {"5", "Heart"},
-		{"8", "Spade"}, {"9", "Diamond"}, {"10", "Club"}, {"Jack", "Club"}, {"Queen", "Club"},
-		{"King", "Spade"}, {"Ace", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"7", "Club"}, {"7", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"7", "Club"}, {"7", "Club"}, {"8", "Diamond"}, {"8", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"7", "Club"}, {"7", "Club"}, {"8", "Diamond"}, {"8", "Club"},
-		{"9", "Diamond"}, {"9", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"7", "Club"}, {"7", "Club"}, {"8", "Diamond"}, {"8", "Club"},
-		{"9", "Diamond"}, {"9", "Club"}, {"10", "Diamond"}, {"10", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"7", "Club"}, {"7", "Club"}, {"8", "Diamond"}, {"8", "Club"},
-		{"9", "Diamond"}, {"9", "Club"}, {"10", "Diamond"}, {"10", "Club"},
-		{"Jack", "Diamond"}, {"Jack", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"3", "Heart"}, {"3", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"7", "Club"}, {"7", "Club"}, {"8", "Diamond"}, {"8", "Club"},
-		{"9", "Diamond"}, {"9", "Club"}, {"10", "Diamond"}, {"10", "Club"},
-		{"Jack", "Diamond"}, {"Jack", "Club"}, {"Queen", "Diamond"}, {"Queen", "Club"}}
-	checkDeckType(&d)
-}
-
-func Test_DeckType5(t *testing.T) {
-	d := Deck{{"4", "Heart"}, {"4", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"5", "Diamond"}, {"5", "Club"},
-		{"3", "Club"}, {"7", "Club"}, {"Jack", "Diamond"}, {"Queen", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"4", "Heart"}, {"4", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"5", "Diamond"}, {"5", "Club"},
-		{"3", "Club"}, {"3", "Club"}, {"Jack", "Diamond"}, {"Jack", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"10", "Heart"}, {"10", "Spade"}, {"10", "Diamond"},
-		{"Jack", "Club"}, {"Jack", "Heart"}, {"Jack", "Spade"},
-		{"Queen", "Diamond"}, {"Queen", "Club"}, {"Queen", "Club"},
-		{"3", "Club"}, {"3", "Diamond"},
-		{"5", "Club"}, {"5", "Diamond"},
-		{"7", "Club"}, {"7", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"10", "Heart"}, {"10", "Spade"}, {"10", "Diamond"},
-		{"Jack", "Club"}, {"Jack", "Heart"}, {"Jack", "Spade"},
-		{"Queen", "Diamond"}, {"Queen", "Club"}, {"Queen", "Club"},
-		{"3", "Club"},
-		{"5", "Diamond"},
-		{"7", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"10", "Heart"}, {"10", "Spade"}, {"10", "Diamond"},
-		{"Jack", "Club"}, {"Jack", "Heart"}, {"Jack", "Spade"},
-		{"3", "Diamond"}, {"3", "Club"},
-		{"4", "Diamond"}, {"4", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"10", "Heart"}, {"10", "Spade"}, {"10", "Diamond"},
-		{"Jack", "Club"}, {"Jack", "Heart"}, {"Jack", "Spade"},
-		{"3", "Diamond"},
-		{"8", "Club"}}
-	checkDeckType(&d)
-
-}
-
-func Test_DeckType6(t *testing.T) {
-	d := Deck{{"4", "Heart"}, {"4", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"5", "Diamond"}, {"5", "Club"},
-		{"6", "Heart"}, {"6", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"3", "Club"},
-		{"7", "Club"},
-		{"8", "Club"},
-		{"9", "Club"},
-		{"Jack", "Diamond"},
-		{"Queen", "Club"}}
-	checkDeckType(&d)
-
-	d = Deck{{"4", "Heart"}, {"4", "Spade"}, {"4", "Diamond"}, {"4", "Club"},
-		{"5", "Heart"}, {"5", "Spade"}, {"5", "Diamond"}, {"5", "Club"},
-		{"6", "Heart"}, {"6", "Spade"}, {"6", "Diamond"}, {"6", "Club"},
-		{"3", "Club"}, {"3", "Diamond"},
-		{"8", "Club"}, {"8", "Spade"},
-		{"Jack", "Diamond"}, {"Jack", "Club"}}
-	checkDeckType(&d)
-}
-
-func Test_DeckType7(t *testing.T) {
-	d := Deck{{"10", "Heart"}, {"10", "Spade"}, {"10", "Diamond"},
-		{"Jack", "Club"}, {"Jack", "Heart"}, {"Jack", "Spade"},
-		{"Queen", "Diamond"}, {"Queen", "Club"}, {"Queen", "Club"},
-		{"King", "Diamond"}, {"King", "Club"}, {"King", "Club"},
-		{"3", "Club"},
-		{"5", "Diamond"},
-		{"4", "Diamond"},
-		{"7", "Diamond"}}
-	checkDeckType(&d)
-
-	d = Deck{{"10", "Heart"}, {"10", "Spade"}, {"10", "Diamond"},
-		{"Jack", "Club"}, {"Jack", "Heart"}, {"Jack", "Spade"},
-		{"Queen", "Diamond"}, {"Queen", "Club"}, {"Queen", "Club"},
-		{"King", "Diamond"}, {"King", "Club"}, {"King", "Club"},
-		{"3", "Club"}, {"3", "Diamond"},
-		{"5", "Diamond"}, {"5", "Club"},
-		{"4", "Diamond"}, {"4", "Club"},
-		{"7", "Diamond"}, {"7", "Club"}}
-	checkDeckType(&d)
+func card(t string) Card {
+	return Card{t, ""}
 }
 
 func checkDeckType(d *Deck) {
-	str, ok := d.deckType()
+	dt, ok := d.deckType()
 	if ok {
-		fmt.Println(d, str)
+		fmt.Println(d, dt)
 	} else {
 		fmt.Println(d, "无效")
 	}
