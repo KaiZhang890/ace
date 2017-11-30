@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -14,6 +15,24 @@ func init() {
 
 // Deck holds the cards in the deck to be shuffled
 type Deck []Card
+
+func (d Deck) showIndex() string {
+	var ret bytes.Buffer
+	ret.WriteString("[")
+
+	for i, c := range d {
+		if i == len(d)-1 {
+			str := fmt.Sprintf("%s(%d)", c, i)
+			ret.WriteString(str)
+		} else {
+			str := fmt.Sprintf("%s(%d) ", c, i)
+			ret.WriteString(str)
+		}
+	}
+
+	ret.WriteString("]")
+	return ret.String()
+}
 
 type deckType struct {
 	code  int
@@ -61,6 +80,26 @@ func (d Deck) shuffle() {
 			d[r], d[i] = d[i], d[r]
 		}
 	}
+}
+
+func (d Deck) play(ss []string) (Deck, Deck) {
+	var d1 Deck
+	var d2 Deck
+	for i, c := range d {
+		selected := false
+		for _, s := range ss {
+			j, ok := strconv.Atoi(s)
+			if ok == nil && i == j {
+				selected = true
+			}
+		}
+		if selected {
+			d1 = append(d1, c)
+		} else {
+			d2 = append(d2, c)
+		}
+	}
+	return d1, d2
 }
 
 func (d Deck) canPlay(preDeck Deck) bool {

@@ -3,6 +3,15 @@ package main
 import "testing"
 import "fmt"
 
+func Test_DeckPlay(t *testing.T) {
+	d := Deck{card("5"), card("6"), card("7"), card("8"), card("9"), card("Queen")}
+	fmt.Println(d.showIndex())
+	ss := []string{"1", "3", "5"}
+	d1, d2 := d.play(ss)
+	fmt.Println(d1)
+	fmt.Println(d2)
+}
+
 func Test_DeckPlay1(t *testing.T) {
 	d1 := Deck{card("3")}
 	d2 := Deck{card("2")}
