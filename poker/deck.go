@@ -22,10 +22,12 @@ func (d Deck) showIndex() string {
 
 	for i, c := range d {
 		if i == len(d)-1 {
-			str := fmt.Sprintf("%s(%d)", c, i)
+			//str := fmt.Sprintf("%s(%d)", c, i)
+			str := fmt.Sprintf("%s", c)
 			ret.WriteString(str)
 		} else {
-			str := fmt.Sprintf("%s(%d) ", c, i)
+			//str := fmt.Sprintf("%s(%d) ", c, i)
+			str := fmt.Sprintf("%s ", c)
 			ret.WriteString(str)
 		}
 	}
@@ -43,8 +45,10 @@ type deckType struct {
 func newDeck() Deck {
 	deck := Deck{}
 
-	types := []string{"Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"}
-	suits := []string{"Heart", "Diamond", "Spade", "Club"}
+	// "Ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"
+	types := []string{"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"}
+	// "Heart", "Diamond", "Spade", "Club"
+	suits := []string{"H", "D", "S", "C"}
 
 	for i := 0; i < len(types); i++ {
 		for n := 0; n < len(suits); n++ {
@@ -56,8 +60,10 @@ func newDeck() Deck {
 		}
 	}
 
-	deck = append(deck, Card{Type: "Colored", Suit: "Joker"})
-	deck = append(deck, Card{Type: "Black", Suit: "Joker"})
+	// {Type: "Colored", Suit: "Joker"}
+	deck = append(deck, Card{Type: "C", Suit: "J"})
+	// {Type: "Black", Suit: "Joker"}
+	deck = append(deck, Card{Type: "B", Suit: "J"})
 
 	return deck
 }
@@ -91,6 +97,28 @@ func (d Deck) play(ss []string) (Deck, Deck) {
 			j, ok := strconv.Atoi(s)
 			if ok == nil && i == j {
 				selected = true
+				break
+			}
+		}
+		if selected {
+			d1 = append(d1, c)
+		} else {
+			d2 = append(d2, c)
+		}
+	}
+	return d1, d2
+}
+
+func (d Deck) play2(ss []string) (Deck, Deck) {
+	var d1 Deck
+	var d2 Deck
+	for _, c := range d {
+		selected := false
+		for j, s := range ss {
+			if c.Type == strings.ToUpper(s) {
+				selected = true
+				ss = append(ss[:j], ss[j+1:]...)
+				break
 			}
 		}
 		if selected {
@@ -116,7 +144,7 @@ func (d Deck) canPlay(preDeck Deck) bool {
 	}
 
 	if dt1.code == dt2.code {
-		str := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace-2-Black-Colored"
+		str := "3-4-5-6-7-8-9-10-J-Q-K-A-2-B-C"
 		i1 := strings.Index(str, dt2.value)
 		i2 := strings.Index(str, dt1.value)
 		if i1 > i2 {
@@ -140,7 +168,7 @@ func (d Deck) deckType() (deckType, bool) {
 	case 2:
 		if d[0].Type == d[1].Type {
 			return deckType{2, "一对", d[0].Type}, true
-		} else if d[0].Suit == "Joker" && d[1].Suit == "Joker" {
+		} else if d[0].Suit == "J" && d[1].Suit == "J" {
 			return deckType{40, "火箭", d[0].Type}, true
 		}
 	case 3:
@@ -270,7 +298,7 @@ func handleDeckType5(d Deck) (deckType, bool) {
 	} else if len(m) == 5 {
 		sort.Sort(d)
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{6, "单顺 五张", d[0].Type}, true
 		}
@@ -297,7 +325,7 @@ func handleDeckType6(d Deck) (deckType, bool) {
 			return deckType{7, "四带一对", d[3].Type}, true
 		} else if v1 == 3 && v2 == 3 {
 			subStr := d[0].Type + "-" + d[3].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{8, "飞机", d[0].Type}, true
 			}
@@ -308,7 +336,7 @@ func handleDeckType6(d Deck) (deckType, bool) {
 		v3 := m[d[4].Type]
 		if v1 == 2 && v2 == 2 && v3 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{9, "双顺 三对", d[0].Type}, true
 			}
@@ -317,7 +345,7 @@ func handleDeckType6(d Deck) (deckType, bool) {
 		}
 	} else if len(m) == 6 {
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type + "-" + d[5].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{11, "单顺 六张", d[0].Type}, true
 		}
@@ -334,7 +362,7 @@ func handleDeckType7(d Deck) (deckType, bool) {
 
 	if len(m) == 7 {
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type + "-" + d[5].Type + "-" + d[6].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{12, "单顺 七张", d[0].Type}, true
 		}
@@ -354,7 +382,7 @@ func handleDeckType8(d Deck) (deckType, bool) {
 		v2 := m[d[7].Type]
 		if v1 == 4 && v2 == 4 {
 			subStr := d[0].Type + "-" + d[7].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{13, "航天飞机", d[0].Type}, true
 			}
@@ -368,7 +396,7 @@ func handleDeckType8(d Deck) (deckType, bool) {
 		}
 		if len(keys) == 6 {
 			subStr := keys[0] + "-" + keys[3]
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				// 33344455 44555666
 				return deckType{14, "飞机带小翼", keys[0]}, true
@@ -383,13 +411,13 @@ func handleDeckType8(d Deck) (deckType, bool) {
 		v5 := m[d[5].Type]
 		if v1 == 2 && v2 == 2 && v3 == 2 && v4 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type + "-" + d[6].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{15, "双顺 四对", d[0].Type}, true
 			}
 		} else if v2 == 3 && v5 == 3 {
 			subStr := d[2].Type + "-" + d[5].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				// 33344456 34555666 45556667
 				return deckType{14, "飞机带小翼", d[2].Type}, true
@@ -397,7 +425,7 @@ func handleDeckType8(d Deck) (deckType, bool) {
 		}
 	} else if len(m) == 8 {
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type + "-" + d[5].Type + "-" + d[6].Type + "-" + d[7].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{16, "单顺 八张", d[0].Type}, true
 		}
@@ -415,7 +443,7 @@ func handleDeckType9(d Deck) (deckType, bool) {
 	if len(m) == 9 {
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type + "-" + d[5].Type + "-" +
 			d[6].Type + "-" + d[7].Type + "-" + d[8].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{17, "单顺 九张", d[0].Type}, true
 		}
@@ -440,7 +468,7 @@ func handleDeckType10(d Deck) (deckType, bool) {
 		}
 		if len(keys) == 6 {
 			subStr := keys[0] + "-" + keys[3]
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				// 3344555666 4455566677 5556667788
 				return deckType{18, "飞机带大翼", keys[0]}, true
@@ -454,7 +482,7 @@ func handleDeckType10(d Deck) (deckType, bool) {
 		v5 := m[d[8].Type]
 		if v1 == 2 && v2 == 2 && v3 == 2 && v4 == 2 && v5 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type + "-" + d[6].Type + "-" + d[8].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{19, "双顺 五对", d[0].Type}, true
 			}
@@ -462,7 +490,7 @@ func handleDeckType10(d Deck) (deckType, bool) {
 	} else if len(m) == 10 {
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type + "-" + d[5].Type + "-" +
 			d[6].Type + "-" + d[7].Type + "-" + d[8].Type + "-" + d[9].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{20, "单顺 十张", d[0].Type}, true
 		}
@@ -481,7 +509,7 @@ func handleDeckType11(d Deck) (deckType, bool) {
 	if len(m) == 11 {
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type + "-" + d[5].Type + "-" +
 			d[6].Type + "-" + d[7].Type + "-" + d[8].Type + "-" + d[9].Type + "-" + d[10].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{21, "单顺 十一张", d[0].Type}, true
 		}
@@ -511,7 +539,7 @@ func handleDeckType12(d Deck) (deckType, bool) {
 		}
 		if len(keys) == 8 {
 			subStr := keys[0] + "-" + keys[7]
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				//333344445566 334455556666 334444555566
 				return deckType{23, "航天飞机 带大翼", keys[0]}, true
@@ -526,7 +554,7 @@ func handleDeckType12(d Deck) (deckType, bool) {
 		v6 := m[d[10].Type]
 		if v1 == 2 && v2 == 2 && v3 == 2 && v4 == 2 && v5 == 2 && v6 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type + "-" + d[6].Type + "-" + d[8].Type + "-" + d[10].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{24, "双顺 六对", d[0].Type}, true
 			}
@@ -539,7 +567,7 @@ func handleDeckType12(d Deck) (deckType, bool) {
 			}
 			if len(keys) == 8 {
 				subStr := keys[0] + "-" + keys[7]
-				allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+				allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 				if strings.Contains(allStr, subStr) {
 					//333344445678 345677778888 344445555678
 					return deckType{25, "航天飞机 带小翼", keys[0]}, true
@@ -554,7 +582,7 @@ func handleDeckType12(d Deck) (deckType, bool) {
 			}
 			if len(keys) == 9 {
 				subStr := keys[0] + "-" + keys[3] + "-" + keys[6]
-				allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+				allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 				if strings.Contains(allStr, subStr) {
 					// 333444555678
 					return deckType{26, "飞机带小翼", d[0].Type}, true
@@ -564,7 +592,7 @@ func handleDeckType12(d Deck) (deckType, bool) {
 	} else if len(m) == 12 {
 		subStr := d[0].Type + "-" + d[1].Type + "-" + d[2].Type + "-" + d[3].Type + "-" + d[4].Type + "-" + d[5].Type + "-" +
 			d[6].Type + "-" + d[7].Type + "-" + d[8].Type + "-" + d[9].Type + "-" + d[10].Type + "-" + d[11].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			return deckType{27, "单顺 十二张", d[0].Type}, true
 		}
@@ -599,7 +627,7 @@ func handleDeckType14(d Deck) (deckType, bool) {
 		v7 := m[d[12].Type]
 		if v1 == 2 && v2 == 2 && v3 == 2 && v4 == 2 && v5 == 2 && v6 == 2 && v7 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type + "-" + d[6].Type + "-" + d[8].Type + "-" + d[10].Type + "-" + d[12].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{28, "双顺 七对", d[0].Type}, true
 			}
@@ -618,7 +646,7 @@ func handleDeckType15(d Deck) (deckType, bool) {
 
 	if len(m) == 5 {
 		subStr := d[0].Type + "-" + d[3].Type + "-" + d[6].Type + "-" + d[9].Type + "-" + d[12].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			// 333444555666777
 			return deckType{29, "飞机", d[0].Type}, true
@@ -632,7 +660,7 @@ func handleDeckType15(d Deck) (deckType, bool) {
 		}
 		if len(keys) == 9 {
 			subStr := keys[0] + "-" + keys[3] + "-" + keys[6]
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				// 333444555667788 334455666777888
 				return deckType{30, "飞机带大翼", keys[0]}, true
@@ -652,7 +680,7 @@ func handleDeckType16(d Deck) (deckType, bool) {
 
 	if len(m) == 4 {
 		subStr := d[0].Type + "-" + d[4].Type + "-" + d[8].Type + "-" + d[12].Type
-		allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+		allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 		if strings.Contains(allStr, subStr) {
 			// 3333444455556666
 			return deckType{31, "航天飞机", d[0].Type}, true
@@ -669,7 +697,7 @@ func handleDeckType16(d Deck) (deckType, bool) {
 		if v1 == 2 && v2 == 2 && v3 == 2 && v4 == 2 && v5 == 2 && v6 == 2 && v7 == 2 && v8 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type + "-" + d[6].Type + "-" + d[8].Type + "-" +
 				d[10].Type + "-" + d[12].Type + "-" + d[14].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{32, "双顺 八对", d[0].Type}, true
 			}
@@ -682,7 +710,7 @@ func handleDeckType16(d Deck) (deckType, bool) {
 			}
 			if len(keys) == 12 {
 				subStr := keys[0] + "-" + keys[3] + "-" + keys[6] + "-" + keys[9]
-				allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+				allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 				if strings.Contains(allStr, subStr) {
 					// 3334445556667891
 					return deckType{33, "飞机带小翼", keys[0]}, true
@@ -720,7 +748,7 @@ func handleDeckType18(d Deck) (deckType, bool) {
 		}
 		if len(keys) == 12 {
 			subStr := keys[0] + "-" + keys[4] + "-" + keys[8]
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				// 333344445555667788
 				return deckType{34, "航天飞机带大翼", keys[0]}, true
@@ -739,7 +767,7 @@ func handleDeckType18(d Deck) (deckType, bool) {
 		if v1 == 2 && v2 == 2 && v3 == 2 && v4 == 2 && v5 == 2 && v6 == 2 && v7 == 2 && v8 == 2 && v9 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type + "-" + d[6].Type + "-" + d[8].Type + "-" +
 				d[10].Type + "-" + d[12].Type + "-" + d[14].Type + "-" + d[16].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{35, "双顺 九对", d[0].Type}, true
 			}
@@ -752,7 +780,7 @@ func handleDeckType18(d Deck) (deckType, bool) {
 			}
 			if len(keys) == 12 {
 				subStr := keys[0] + "-" + keys[4] + "-" + keys[8]
-				allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+				allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 				if strings.Contains(allStr, subStr) {
 					// 3333444455556789ab
 					return deckType{36, "航天飞机带小翼", keys[0]}, true
@@ -789,7 +817,7 @@ func handleDeckType20(d Deck) (deckType, bool) {
 		}
 		if len(keys) == 12 {
 			subStr := keys[0] + "-" + keys[4] + "-" + keys[8]
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				// 333444555666778899aa
 				return deckType{37, "飞机带大翼", keys[0]}, true
@@ -809,7 +837,7 @@ func handleDeckType20(d Deck) (deckType, bool) {
 		if v1 == 2 && v2 == 2 && v3 == 2 && v4 == 2 && v5 == 2 && v6 == 2 && v7 == 2 && v8 == 2 && v9 == 2 && v10 == 2 {
 			subStr := d[0].Type + "-" + d[2].Type + "-" + d[4].Type + "-" + d[6].Type + "-" + d[8].Type + "-" +
 				d[10].Type + "-" + d[12].Type + "-" + d[14].Type + "-" + d[16].Type + "-" + d[18].Type
-			allStr := "3-4-5-6-7-8-9-10-Jack-Queen-King-Ace"
+			allStr := "3-4-5-6-7-8-9-10-J-Q-K-A"
 			if strings.Contains(allStr, subStr) {
 				return deckType{38, "双顺 十对", d[0].Type}, true
 			}
@@ -828,48 +856,48 @@ func (d Deck) Swap(i, j int) {
 }
 
 func (d Deck) Less(i, j int) bool {
-	if d[i].Type == "Colored" {
+	if d[i].Type == "C" {
 		return false
 
-	} else if d[i].Type == "Black" {
-		if d[j].Type == "Colored" {
+	} else if d[i].Type == "B" {
+		if d[j].Type == "C" {
 			return true
 		}
 		return false
 
 	} else if d[i].Type == "2" {
 		switch d[j].Type {
-		case "Colored", "Black":
+		case "C", "B":
 			return true
 		default:
 			return false
 		}
 
-	} else if d[i].Type == "Ace" {
+	} else if d[i].Type == "A" {
 		switch d[j].Type {
-		case "Colored", "Black", "2":
+		case "C", "B", "2":
 			return true
 		default:
 			return false
 		}
 
-	} else if d[i].Type == "King" {
+	} else if d[i].Type == "K" {
 		switch d[j].Type {
-		case "Colored", "Black", "2", "Ace":
+		case "C", "B", "2", "A":
 			return true
 		default:
 			return false
 		}
 
-	} else if d[i].Type == "Queen" {
+	} else if d[i].Type == "Q" {
 		switch d[j].Type {
-		case "Colored", "Black", "2", "Ace", "King":
+		case "C", "B", "2", "A", "K":
 			return true
 		default:
 			return false
 		}
 
-	} else if d[i].Type == "Jack" {
+	} else if d[i].Type == "J" {
 		switch d[j].Type {
 		case "3", "4", "5", "6", "7", "8", "9", "10":
 			return false

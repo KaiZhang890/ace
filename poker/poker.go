@@ -97,11 +97,11 @@ L:
 					ud = &d3
 				}
 
-				fmt.Println("Input the index(0,1,9,11):")
+				fmt.Println("Input the cards(3,3,3,4):")
 				text, _ := reader.ReadString('\n')
 				text = strings.TrimSpace(text)
 				ss := strings.Split(text, ",")
-				sd, rd := ud.play(ss)
+				sd, rd := ud.play2(ss)
 				if len(sd) == 0 {
 					fmt.Println("Pass")
 					turn++
