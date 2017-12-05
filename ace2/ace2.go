@@ -1,11 +1,14 @@
 package main
 
 import (
-	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net"
 	"strings"
+	"sync"
+	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -17,10 +20,42 @@ const (
 	ConnectType = "tcp"
 )
 
+type userState int
+
+const (
+	stateNaming userState = iota
+	stateIdle
+	stateMatching
+	stateStart
+)
+
 type user struct {
 	name  string
 	conn  net.Conn
+	state userState
 	group []*user
+}
+
+var allUser []*user
+var mutex = &sync.RWMutex{}
+
+func addUser(u *user) {
+	mutex.Lock()
+	allUser = append(allUser, u)
+	mutex.Unlock()
+}
+
+func removeUser(u *user) {
+	mutex.Lock()
+	for i, u2 := range allUser {
+		if u == u2 {
+			copy(allUser[i:], allUser[i+1:])
+			allUser[len(allUser)-1] = nil
+			allUser = allUser[:len(allUser)-1]
+			break
+		}
+	}
+	mutex.Unlock()
 }
 
 func main() {
@@ -30,11 +65,10 @@ func main() {
 	listener, err := net.Listen(ConnectType, ConnectHost+":"+ConnectPort)
 	e(err)
 	defer listener.Close()
-
 	log.Println("listening on " + ConnectHost + ":" + ConnectPort)
 
-	c1 := make(chan *user)
-	go handleReady(c1)
+	go handleMatching()
+	// handle accept
 	for {
 		connect, err := listener.Accept()
 		e(err)
@@ -42,65 +76,106 @@ func main() {
 			continue
 		}
 
-		go handleConnect(connect, c1)
+		go handleConnect(connect)
 	}
 }
 
-func handleConnect(conn net.Conn, c chan *user) {
-	user := user{name: "", conn: conn, group: nil}
-	cmdLevel := 0
+func handleConnect(conn net.Conn) {
+	currentUser := user{"", conn, stateNaming, nil}
+
+	addUser(&currentUser)
 	conn.Write([]byte("type your name: "))
 
 	defer func() {
-		user.conn.Close()
-		user.group = nil
+		str := fmt.Sprintf("%s left\n", currentUser.name)
+		group := currentUser.group
+		if group != nil {
+			for _, user := range group {
+				if user != &currentUser {
+					user.conn.Write([]byte(str))
+				}
+			}
+
+			currentUser.group = nil
+		}
+		conn.Close()
 	}()
 
 OuterLoop:
 	for {
 		buffer := make([]byte, 100)
-		len, err := conn.Read(buffer)
+		n, err := conn.Read(buffer)
 		if err == io.EOF {
-			log.Println("user disconnected: ", user.name)
-			break
+			removeUser(&currentUser)
+			break OuterLoop
 		} else {
 			e(err)
 		}
 
-		command := strings.TrimSpace(string(buffer[:len]))
-		switch cmdLevel {
-		case 0:
-			user.name = command
-			log.Println("client connected: ", user.name)
+		userInput := strings.TrimSpace(string(buffer[:n]))
+		switch currentUser.state {
+		case stateNaming:
+			if utf8.RuneCountInString(userInput) > 0 {
+				currentUser.name = userInput
+				currentUser.state = stateIdle
 
-			var res bytes.Buffer
-			res.WriteString("hello, " + user.name + "\n")
-			res.WriteString("type command number(1-Ready 2-Exit):")
-			conn.Write(res.Bytes())
-			cmdLevel++
-		case 1:
-			if command == "1" {
-				c <- &user
-				cmdLevel++
-			} else if command == "2" {
-				break OuterLoop
+				str := fmt.Sprintf("%s, are you ready?[Y/n]", currentUser.name)
+				conn.Write([]byte(str))
 			} else {
-				conn.Write([]byte("type command number(1-Ready 2-Exit):"))
+				conn.Write([]byte("\ntype your name: "))
 			}
-		case 2:
-			if user.group != nil {
-				for _, u := range user.group {
-					u.conn.Write([]byte(user.name + " says: " + command + "\n"))
-				}
-			} else if command == "2" {
-
+		case stateIdle:
+			if strings.ToUpper(userInput) == "Y" {
+				currentUser.state = stateMatching
+				conn.Write([]byte("Matching..."))
 			} else {
-				conn.Write([]byte("Matching...(2-Cancel)\n"))
+				str := fmt.Sprintf("%s, are you ready?[Y/n]", currentUser.name)
+				conn.Write([]byte(str))
+			}
+		case stateMatching:
+			conn.Write([]byte("Matching..."))
+		case stateStart:
+			if len(userInput) > 0 {
+				log.Println(len(currentUser.group))
+				for _, user := range currentUser.group {
+					str := fmt.Sprintf("%s say: %s\n", currentUser.name, userInput)
+					user.conn.Write([]byte(str))
+				}
 			}
 		}
 	}
 }
 
+func handleMatching() {
+	for {
+		var group []*user
+		for _, user := range allUser {
+			if user.state == stateMatching {
+				group = append(group, user)
+				if len(group) == 3 {
+					break
+				}
+			}
+		}
+
+		if len(group) == 3 {
+			//d1, d2, d3, d4 := poker.Deal()
+			str := fmt.Sprintf("\n%s, %s, %s in a group\n", group[0].name, group[1].name, group[2].name)
+			for _, user := range group {
+				user.group = group
+				user.state = stateStart
+				user.conn.Write([]byte(str))
+			}
+		} else {
+			group = nil
+		}
+
+		time.Sleep(1000 * time.Millisecond)
+	}
+
+}
+
+/*
 var readyUsers []*user
 
 func handleReady(c chan *user) {
@@ -121,6 +196,7 @@ func handleReady(c chan *user) {
 			cu.conn.Write([]byte("Matching...(2-Cancel)\n"))
 		} else {
 			str := readyUsers[0].name + ", " + readyUsers[1].name + ", " + readyUsers[2].name + " in a group\n"
+			str = str + "1-Start 2-Cancel:"
 			group := []*user{readyUsers[0], readyUsers[1], readyUsers[2]}
 			for i := 0; i < 3; i++ {
 				readyUsers[i].conn.Write([]byte(str))
@@ -138,7 +214,7 @@ func handleGroup(group []*user) {
 func handleReadyCancel(c chan *user) {
 
 }
-
+*/
 func e(err error) {
 	if err != nil {
 		log.Fatal(err)

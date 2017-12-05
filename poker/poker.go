@@ -1,4 +1,4 @@
-package main
+package poker
 
 import (
 	"bufio"
@@ -27,7 +27,7 @@ L:
 	for {
 		switch index {
 		case 0:
-			d1, d2, d3, d4 = deal()
+			d1, d2, d3, d4 = Deal()
 			fmt.Println("User1:", d1)
 			fmt.Println("User2:", d2)
 			fmt.Println("User3:", d3)
@@ -155,7 +155,8 @@ L:
 	}
 }
 
-func deal() (Deck, Deck, Deck, Deck) {
+// Deal t
+func Deal() (Deck, Deck, Deck, Deck) {
 	deck := newDeck()
 	deck.shuffle()
 
