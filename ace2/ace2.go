@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ace/poker"
 	"fmt"
 	"io"
 	"log"
@@ -27,6 +28,7 @@ const (
 	stateIdle
 	stateMatching
 	stateStart
+	statePlaying
 )
 
 type user struct {
@@ -34,6 +36,38 @@ type user struct {
 	conn  net.Conn
 	state userState
 	group []*user
+}
+
+func (u *user) handleInput(userInput string) {
+	switch u.state {
+	case stateNaming:
+		if utf8.RuneCountInString(userInput) > 0 {
+			u.name = userInput
+			u.state = stateIdle
+
+			str := fmt.Sprintf("%s, are you ready?[Y/n]", u.name)
+			u.conn.Write([]byte(str))
+		} else {
+			u.conn.Write([]byte("\ntype your name: "))
+		}
+	case stateIdle:
+		if strings.ToUpper(userInput) == "Y" {
+			u.state = stateMatching
+			u.conn.Write([]byte("Matching..."))
+		} else {
+			str := fmt.Sprintf("%s, are you ready?[Y/n]", u.name)
+			u.conn.Write([]byte(str))
+		}
+	case stateMatching:
+		u.conn.Write([]byte("Matching..."))
+	case stateStart:
+		if len(userInput) > 0 {
+			for _, user := range u.group {
+				str := fmt.Sprintf("%s say: %s\n", u.name, userInput)
+				user.conn.Write([]byte(str))
+			}
+		}
+	}
 }
 
 var allUser []*user
@@ -113,36 +147,7 @@ OuterLoop:
 		}
 
 		userInput := strings.TrimSpace(string(buffer[:n]))
-		switch currentUser.state {
-		case stateNaming:
-			if utf8.RuneCountInString(userInput) > 0 {
-				currentUser.name = userInput
-				currentUser.state = stateIdle
-
-				str := fmt.Sprintf("%s, are you ready?[Y/n]", currentUser.name)
-				conn.Write([]byte(str))
-			} else {
-				conn.Write([]byte("\ntype your name: "))
-			}
-		case stateIdle:
-			if strings.ToUpper(userInput) == "Y" {
-				currentUser.state = stateMatching
-				conn.Write([]byte("Matching..."))
-			} else {
-				str := fmt.Sprintf("%s, are you ready?[Y/n]", currentUser.name)
-				conn.Write([]byte(str))
-			}
-		case stateMatching:
-			conn.Write([]byte("Matching..."))
-		case stateStart:
-			if len(userInput) > 0 {
-				log.Println(len(currentUser.group))
-				for _, user := range currentUser.group {
-					str := fmt.Sprintf("%s say: %s\n", currentUser.name, userInput)
-					user.conn.Write([]byte(str))
-				}
-			}
-		}
+		currentUser.handleInput(userInput)
 	}
 }
 
@@ -159,64 +164,33 @@ func handleMatching() {
 		}
 
 		if len(group) == 3 {
-			//d1, d2, d3, d4 := poker.Deal()
 			str := fmt.Sprintf("\n%s, %s, %s in a group\n", group[0].name, group[1].name, group[2].name)
 			for _, user := range group {
 				user.group = group
 				user.state = stateStart
 				user.conn.Write([]byte(str))
 			}
-		} else {
-			group = nil
+			startGame(group)
 		}
 
 		time.Sleep(1000 * time.Millisecond)
 	}
-
 }
 
-/*
-var readyUsers []*user
-
-func handleReady(c chan *user) {
-	for cu := range c {
-
-		isReady := false
-		for _, ru := range readyUsers {
-			if ru == cu {
-				isReady = true
-				break
-			}
-		}
-		if !isReady {
-			readyUsers = append(readyUsers, cu)
-		}
-
-		if len(readyUsers) < 3 {
-			cu.conn.Write([]byte("Matching...(2-Cancel)\n"))
-		} else {
-			str := readyUsers[0].name + ", " + readyUsers[1].name + ", " + readyUsers[2].name + " in a group\n"
-			str = str + "1-Start 2-Cancel:"
-			group := []*user{readyUsers[0], readyUsers[1], readyUsers[2]}
-			for i := 0; i < 3; i++ {
-				readyUsers[i].conn.Write([]byte(str))
-				readyUsers[i].group = group
-			}
-			readyUsers = readyUsers[3:]
-		}
-	}
-}
-
-func handleGroup(group []*user) {
-
-}
-
-func handleReadyCancel(c chan *user) {
-
-}
-*/
 func e(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func startGame(group []*user) {
+	d1, d2, d3, _ := poker.Deal()
+
+	str := fmt.Sprintf("You got:%s\n", d1)
+	group[0].conn.Write([]byte(str))
+	str = fmt.Sprintf("You got:%s\n", d2)
+	group[1].conn.Write([]byte(str))
+	str = fmt.Sprintf("You got:%s\n", d3)
+	group[2].conn.Write([]byte(str))
+
 }
