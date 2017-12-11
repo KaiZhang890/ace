@@ -1,15 +1,12 @@
 package main
 
 import (
-	"ace/poker"
-	"fmt"
 	"io"
 	"log"
 	"net"
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 )
 
 const (
@@ -21,23 +18,7 @@ const (
 	ConnectType = "tcp"
 )
 
-type userState int
-
-const (
-	stateNaming userState = iota
-	stateIdle
-	stateMatching
-	stateStart
-	statePlaying
-)
-
-type user struct {
-	name  string
-	conn  net.Conn
-	state userState
-	group []*user
-}
-
+/*
 func (u *user) handleInput(userInput string) {
 	switch u.state {
 	case stateNaming:
@@ -70,28 +51,7 @@ func (u *user) handleInput(userInput string) {
 	}
 }
 
-var allUser []*user
-var mutex = &sync.RWMutex{}
-
-func addUser(u *user) {
-	mutex.Lock()
-	allUser = append(allUser, u)
-	mutex.Unlock()
-}
-
-func removeUser(u *user) {
-	mutex.Lock()
-	for i, u2 := range allUser {
-		if u == u2 {
-			copy(allUser[i:], allUser[i+1:])
-			allUser[len(allUser)-1] = nil
-			allUser = allUser[:len(allUser)-1]
-			break
-		}
-	}
-	mutex.Unlock()
-}
-
+*/
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -115,42 +75,76 @@ func main() {
 }
 
 func handleConnect(conn net.Conn) {
-	currentUser := user{"", conn, stateNaming, nil}
-
-	addUser(&currentUser)
-	conn.Write([]byte("type your name: "))
-
+	c := NewClient(conn)
 	defer func() {
-		str := fmt.Sprintf("%s left\n", currentUser.name)
-		group := currentUser.group
-		if group != nil {
-			for _, user := range group {
-				if user != &currentUser {
-					user.conn.Write([]byte(str))
-				}
-			}
-
-			currentUser.group = nil
-		}
-		conn.Close()
+		c.onClose()
 	}()
 
 OuterLoop:
 	for {
-		buffer := make([]byte, 100)
+		buffer := make([]byte, 1024)
 		n, err := conn.Read(buffer)
-		if err == io.EOF {
-			removeUser(&currentUser)
-			break OuterLoop
-		} else {
-			e(err)
+		if err != nil {
+			if err == io.EOF {
+				break OuterLoop
+			} else {
+				log.Fatal(err)
+				continue
+			}
 		}
 
 		userInput := strings.TrimSpace(string(buffer[:n]))
-		currentUser.handleInput(userInput)
+		c.onRead(userInput)
 	}
 }
 
+var allUser []*User
+var mutex = &sync.RWMutex{}
+
+func AddUser(u *User) {
+	mutex.Lock()
+	log.Println(allUser)
+	allUser = append(allUser, u)
+	log.Println(allUser)
+	mutex.Unlock()
+}
+
+func RemoveUser(u *User) {
+	mutex.Lock()
+	for i, u2 := range allUser {
+		if u == u2 {
+			copy(allUser[i:], allUser[i+1:])
+			allUser[len(allUser)-1] = nil
+			allUser = allUser[:len(allUser)-1]
+			break
+		}
+	}
+	mutex.Unlock()
+}
+
+func handleMatching() {
+	for {
+		var group []*User
+		mutex.RLock()
+		for _, user := range allUser {
+			if user.state == stateMatching {
+				group = append(group, user)
+				if len(group) == 3 {
+					break
+				}
+			}
+		}
+		mutex.RUnlock()
+
+		if len(group) == 3 {
+			NewRoom(group[0], group[1], group[2])
+		}
+
+		time.Sleep(1000 * time.Millisecond)
+	}
+}
+
+/*
 func handleMatching() {
 	for {
 		var group []*user
@@ -177,12 +171,6 @@ func handleMatching() {
 	}
 }
 
-func e(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
 func startGame(group []*user) {
 	d1, d2, d3, _ := poker.Deal()
 
@@ -193,4 +181,11 @@ func startGame(group []*user) {
 	str = fmt.Sprintf("You got:%s\n", d3)
 	group[2].conn.Write([]byte(str))
 
+}
+*/
+
+func e(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
