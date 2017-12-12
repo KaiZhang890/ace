@@ -38,6 +38,10 @@ func (u *User) read(cmd string) {
 	}
 }
 
+func (u *User) write(b []byte) (n int, err error) {
+	return u.client.write(b)
+}
+
 func (u *User) close() {
 	log.Printf("%s close\n", u)
 	u.client.close()

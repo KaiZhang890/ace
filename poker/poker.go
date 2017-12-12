@@ -101,7 +101,7 @@ L:
 				text, _ := reader.ReadString('\n')
 				text = strings.TrimSpace(text)
 				ss := strings.Split(text, ",")
-				sd, rd := ud.play2(ss)
+				sd, rd := ud.Play2(ss)
 				if len(sd) == 0 {
 					fmt.Println("Pass")
 					turn++
@@ -109,7 +109,7 @@ L:
 				}
 
 				if len(curDeck) == 0 || curUser == ti {
-					_, ok := sd.deckType()
+					_, ok := sd.DeckType()
 					if ok {
 						curDeck = sd
 						curUser = ti
@@ -121,7 +121,7 @@ L:
 						}
 					}
 				} else {
-					ok := sd.canPlay(curDeck)
+					ok := sd.CanPlay(curDeck)
 					if ok {
 						curDeck = sd
 						curUser = ti

@@ -24,8 +24,12 @@ func (c *Client) read(cmd string) {
 		u := NewUser(c, cmd)
 		AddUser(u)
 	} else {
-		c.conn.Write([]byte("\ntype your name: "))
+		c.write([]byte("\ntype your name: "))
 	}
+}
+
+func (c *Client) write(b []byte) (n int, err error) {
+	return c.conn.Write(b)
 }
 
 func (c *Client) close() {
@@ -38,7 +42,7 @@ func NewClient(conn net.Conn) *Client {
 	c := Client{conn, nil, nil}
 	c.onRead = c.read
 	c.onClose = c.close
-	c.conn.Write([]byte("type your name: "))
+	c.write([]byte("type your name: "))
 
 	log.Printf("new %s\n", c)
 	return &c

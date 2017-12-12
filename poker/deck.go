@@ -109,7 +109,7 @@ func (d Deck) play(ss []string) (Deck, Deck) {
 	return d1, d2
 }
 
-func (d Deck) play2(ss []string) (Deck, Deck) {
+func (d Deck) Play2(ss []string) (Deck, Deck) {
 	var d1 Deck
 	var d2 Deck
 	for _, c := range d {
@@ -130,14 +130,14 @@ func (d Deck) play2(ss []string) (Deck, Deck) {
 	return d1, d2
 }
 
-func (d Deck) canPlay(preDeck Deck) bool {
-	dt1, ret := preDeck.deckType()
+func (d Deck) CanPlay(preDeck Deck) bool {
+	dt1, ret := preDeck.DeckType()
 	if !ret {
 		fmt.Println("preDeck is Invalid")
 		return false
 	}
 
-	dt2, ret := d.deckType()
+	dt2, ret := d.DeckType()
 	if !ret {
 		fmt.Println("deck is Invalid")
 		return false
@@ -161,7 +161,7 @@ func (d Deck) canPlay(preDeck Deck) bool {
 	return false
 }
 
-func (d Deck) deckType() (deckType, bool) {
+func (d Deck) DeckType() (deckType, bool) {
 	switch len(d) {
 	case 1:
 		return deckType{1, "单张", d[0].Type}, true

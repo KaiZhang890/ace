@@ -60,7 +60,7 @@ func Test_DeckPlay1(t *testing.T) {
 }
 
 func checkCanPlay(d1 Deck, d2 Deck) {
-	if d2.canPlay(d1) {
+	if d2.CanPlay(d1) {
 		fmt.Println(d2, "can beat", d1)
 	} else {
 		fmt.Println(d2, "can't beat", d1)
