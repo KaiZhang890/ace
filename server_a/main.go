@@ -11,7 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Config struct {
+type config struct {
 	DataSourceName string
 }
 
@@ -23,7 +23,7 @@ func main() {
 		gin.DisableConsoleColor()
 		gin.SetMode(gin.ReleaseMode)
 	*/
-	var conf Config
+	var conf config
 	if _, err := toml.DecodeFile("./config.toml", &conf); err != nil {
 		fmt.Println(err)
 	}
@@ -36,14 +36,7 @@ func main() {
 	router := gin.Default()
 	router.Use(bindDB(db))
 
-	v1 := router.Group("/v1/todos")
-	{
-		v1.POST("/", createTodo)        // http://127.0.0.1:8080/v1/todos?content=读报
-		v1.GET("/", fetchAllTodo)       // http://127.0.0.1:8080/v1/todos
-		v1.GET("/:id", fetchSingleTodo) // http://127.0.0.1:8080/v1/todos/14
-		v1.PUT("/:id", updateTodo)      // http://127.0.0.1:8080/v1/todos/14?content=readNewspaper&status=2
-		v1.DELETE("/:id", deleteTodo)   // http://127.0.0.1:8080/v1/todos/14
-	}
+	registerImp(router)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"message": "API not found"})

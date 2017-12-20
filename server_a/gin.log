@@ -1,0 +1,2 @@
+Error 1062: Duplicate entry '18600000002' for key 'users_phone_unique'
+[GIN] 2017/12/20 - 15:53:57 | 500 |  187.069839ms |       127.0.0.1 | POST     /register
