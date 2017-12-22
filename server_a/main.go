@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/BurntSushi/toml"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,32 +16,39 @@ type config struct {
 
 func main() {
 	// for release
+	uuid := NewUUID()
+	fmt.Println(uuid)
 	/*
 		f, _ := os.Create("gin.log")
 		gin.DefaultWriter = io.MultiWriter(f)
 		gin.DisableConsoleColor()
 		gin.SetMode(gin.ReleaseMode)
 	*/
-	var conf config
-	if _, err := toml.DecodeFile("./config.toml", &conf); err != nil {
-		fmt.Println(err)
-	}
-	db, err := sql.Open("mysql", conf.DataSourceName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
 
-	router := gin.Default()
-	router.Use(bindDB(db))
+	/*
+		var conf config
+		if _, err := toml.DecodeFile("./config.toml", &conf); err != nil {
+			fmt.Println(err)
+		}
+		db, err := sql.Open("mysql", conf.DataSourceName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
 
-	registerImp(router)
+		router := gin.Default()
+		router.Use(bindDB(db))
+		// 利用中间件实现IP黑名单
 
-	router.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{"message": "API not found"})
-	})
+		registerImp(router)
+		smsCaptchaImp(router)
 
-	router.Run(":8080")
+		router.NoRoute(func(c *gin.Context) {
+			c.JSON(http.StatusNotFound, gin.H{"message": "API not found"})
+		})
+
+		router.Run(":8080")
+	*/
 }
 
 func bindDB(db *sql.DB) gin.HandlerFunc {
